@@ -1,0 +1,17 @@
+name: HCAdvancementsRedirect
+version: "${version}"
+main: fr.noltox.hcplugins.advancementsbuttonredirect.HCAdvancementsRedirect
+api-version: "26.2"
+description: Redirige le bouton Progrès du menu Échap vers une commande console configurable.
+author: Noltox
+website: https://heavencube.fr/
+dependencies:
+  server:
+    HCCore:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    packetevents:
+      load: BEFORE
+      required: true
+      join-classpath: true
