@@ -23,8 +23,5 @@ tasks.processResources {
 }
 
 tasks.jar {
-    val buildDate = providers.gradleProperty("buildDate").orNull
-    val buildVersion = project.version.toString()
-    val fileVersion = if (buildDate == null) buildVersion else "$buildDate-b$buildVersion"
-    archiveFileName.set("HCAdvancementsRedirect-$fileVersion.jar")
+    archiveFileName.set("HCAdvancementsRedirect-${project.version}.jar")
 }
