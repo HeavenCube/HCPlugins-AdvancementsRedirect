@@ -1,6 +1,7 @@
 package fr.noltox.hcplugins.advancementsbuttonredirect.command;
 
 import fr.noltox.hcplugins.core.api.command.CoreCommand;
+import fr.noltox.hcplugins.core.api.message.CoreTranslations;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -9,27 +10,16 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.BooleanSupplier;
+import org.bukkit.plugin.Plugin;
 
 /**
  * Defines the canonical {@code /hcplugins advancementsredirect} branch.
  */
 public final class AdvancementsCommand implements CoreCommand {
 
-    private static final Component RELOAD_SUCCESS = Component.text(
-            "Configuration rechargée avec succès.",
-            NamedTextColor.GREEN
-    );
     private static final Component RELOAD_INVALID = Component.text(
             "Configuration rechargée, mais la clé console-command est vide ou absente.",
             NamedTextColor.YELLOW
-    );
-    private static final Component RELOAD_FAILED = Component.text(
-            "Échec du rechargement : l'ancienne commande reste active.",
-            NamedTextColor.RED
-    );
-    private static final Component OPERATOR_ONLY = Component.text(
-            "Cette commande est réservée aux opérateurs.",
-            NamedTextColor.RED
     );
     private static final Component USAGE = Component.text(
             "Utilisation : /hcplugins advancementsredirect reload",
@@ -38,11 +28,17 @@ public final class AdvancementsCommand implements CoreCommand {
 
     private final BooleanSupplier configurationReloader;
     private final BooleanSupplier commandConfigured;
+    private final Plugin plugin;
+    private final CoreTranslations translations;
 
     public AdvancementsCommand(
+            Plugin plugin,
+            CoreTranslations translations,
             BooleanSupplier configurationReloader,
             BooleanSupplier commandConfigured
     ) {
+        this.plugin = plugin;
+        this.translations = translations;
         this.configurationReloader = configurationReloader;
         this.commandConfigured = commandConfigured;
     }
@@ -67,13 +63,15 @@ public final class AdvancementsCommand implements CoreCommand {
 
     private void reload(CommandSourceStack source) {
         if (!source.getSender().isOp()) {
-            source.getSender().sendMessage(OPERATOR_ONLY);
+            source.getSender().sendMessage(translations.operatorOnly());
             return;
         }
+        long started = System.nanoTime();
         if (!configurationReloader.getAsBoolean()) {
-            source.getSender().sendMessage(RELOAD_FAILED);
+            source.getSender().sendMessage(translations.reloadFailure(plugin));
             return;
         }
-        source.getSender().sendMessage(commandConfigured.getAsBoolean() ? RELOAD_SUCCESS : RELOAD_INVALID);
+        source.getSender().sendMessage(commandConfigured.getAsBoolean()
+                ? translations.reloadSuccess(plugin, System.nanoTime() - started) : RELOAD_INVALID);
     }
 }

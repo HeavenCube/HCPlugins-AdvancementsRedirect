@@ -83,6 +83,8 @@ public final class HCAdvancementsRedirect extends JavaPlugin {
             }
 
             AdvancementsCommand commands = new AdvancementsCommand(
+                    this,
+                    HCPluginsCore.translations(this),
                     this::reloadConfiguredCommand,
                     commandExecutor::isConfigured
             );
