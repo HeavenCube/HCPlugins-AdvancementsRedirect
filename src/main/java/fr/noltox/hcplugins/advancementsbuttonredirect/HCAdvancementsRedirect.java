@@ -6,7 +6,7 @@ import com.github.retrooper.packetevents.event.EventManager;
 import com.github.retrooper.packetevents.event.PacketListenerCommon;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.github.retrooper.packetevents.manager.player.PlayerManager;
-import fr.noltox.hcplugins.advancementsbuttonredirect.support.BukkitYaml;
+import fr.noltox.hcplugins.core.api.config.BukkitYaml;
 import fr.noltox.hcplugins.advancementsbuttonredirect.command.AdvancementsCommand;
 import fr.noltox.hcplugins.core.api.HCPluginsCore;
 import fr.noltox.hcplugins.core.api.command.CoreCommandRegistration;
