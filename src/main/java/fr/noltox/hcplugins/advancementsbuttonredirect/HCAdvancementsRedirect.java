@@ -7,6 +7,7 @@ import com.github.retrooper.packetevents.event.PacketListenerCommon;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.github.retrooper.packetevents.manager.player.PlayerManager;
 import fr.noltox.hcplugins.core.api.config.BukkitYaml;
+import fr.noltox.hcplugins.core.api.config.HCPluginFiles;
 import fr.noltox.hcplugins.advancementsbuttonredirect.command.AdvancementsCommand;
 import fr.noltox.hcplugins.core.api.HCPluginsCore;
 import fr.noltox.hcplugins.core.api.command.CoreCommandRegistration;
@@ -36,7 +37,7 @@ public final class HCAdvancementsRedirect extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        saveDefaultConfig();
+        HCPluginFiles.copyDefault(this, "config.yml", HCPluginFiles.singleConfiguration(this));
         String configuredConsoleCommand;
         try {
             configuredConsoleCommand = loadConfiguredCommand();
@@ -115,7 +116,7 @@ public final class HCAdvancementsRedirect extends JavaPlugin {
     }
 
     private String loadConfiguredCommand() {
-        Path configPath = getDataFolder().toPath().resolve("config.yml");
+        Path configPath = HCPluginFiles.singleConfiguration(this);
         FileConfiguration candidate = BukkitYaml.load(configPath);
         String command = candidate.getString(CONSOLE_COMMAND_KEY);
         return command == null ? "" : command.strip();

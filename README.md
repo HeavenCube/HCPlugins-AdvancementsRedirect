@@ -8,3 +8,6 @@ autorisation écrite préalable. Voir [LICENSE](LICENSE).
 
 Cloner `HCPlugins-Core` à côté de ce dépôt, puis lancer `./gradlew build`.
 HCCore et PacketEvents sont requis sur le serveur.
+
+La configuration est `plugins/HCPlugins/HCAdvancementsRedirect.yml`. L'ancien
+fichier `plugins/HCAdvancementsRedirect/config.yml` n'est pas repris automatiquement.
