@@ -25,7 +25,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
@@ -45,14 +45,14 @@ final class AdvancementInjector implements PacketListener, Listener {
     private static final ResourceLocation EMPTY_ITEM_MODEL = new ResourceLocation("nexo", "vide");
     private static final long FALLBACK_DELAY_TICKS = 5L;
 
-    private final JavaPlugin plugin;
+    private final Plugin plugin;
     private final PlayerManager playerManager;
     private final Map<UUID, User> injectedPlayers = new ConcurrentHashMap<>();
     // Bukkit lifecycle callbacks and fallback tasks access this map only from the server thread.
     private final Map<UUID, BukkitTask> pendingFallbacks = new HashMap<>();
     private volatile boolean active = true;
 
-    AdvancementInjector(JavaPlugin plugin, PlayerManager playerManager) {
+    AdvancementInjector(Plugin plugin, PlayerManager playerManager) {
         this.plugin = plugin;
         this.playerManager = playerManager;
     }
@@ -101,21 +101,28 @@ final class AdvancementInjector implements PacketListener, Listener {
         active = false;
         pendingFallbacks.values().forEach(BukkitTask::cancel);
         pendingFallbacks.clear();
-        for (UUID playerId : Set.copyOf(injectedPlayers.keySet())) {
-            Player player = Bukkit.getPlayer(playerId);
-            User user = player == null ? null : playerManager.getUser(player);
-            if (user == null || injectedPlayers.get(playerId) != user) {
-                continue;
+        try {
+            // Server shutdown may already have removed PacketEvents' Netty handlers.
+            // The client disconnects anyway; only a standalone disable needs tab removal.
+            if (!plugin.getServer().isStopping()) {
+                for (UUID playerId : Set.copyOf(injectedPlayers.keySet())) {
+                    Player player = plugin.getServer().getPlayer(playerId);
+                    User user = player == null || !player.isOnline() ? null : playerManager.getUser(player);
+                    if (user == null || injectedPlayers.get(playerId) != user) {
+                        continue;
+                    }
+                    try {
+                        user.sendPacketSilently(new WrapperPlayServerUpdateAdvancements(
+                                false, List.of(), Set.of(MENU_REDIRECT_ID), Map.of(), false));
+                    } catch (RuntimeException exception) {
+                        plugin.getLogger().log(Level.WARNING,
+                                "Impossible de retirer le tab de redirection pour " + playerId + '.', exception);
+                    }
+                }
             }
-            try {
-                user.sendPacketSilently(new WrapperPlayServerUpdateAdvancements(
-                        false, List.of(), Set.of(MENU_REDIRECT_ID), Map.of(), false));
-            } catch (RuntimeException exception) {
-                plugin.getLogger().log(Level.WARNING,
-                        "Impossible de retirer le tab de redirection pour " + playerId + '.', exception);
-            }
+        } finally {
+            injectedPlayers.clear();
         }
-        injectedPlayers.clear();
     }
 
     private void cancelFallback(UUID playerId) {

@@ -79,7 +79,13 @@ thread réel, puis revalider le contexte avant mutation.
 
 `ConfiguredCommandExecutorTest` couvre commande absente/vide, arguments et rejet des types YAML non textuels.
 L'injection mémorise la session PacketEvents ; un ancien envoi ne dispense pas la nouvelle session du fallback.
-Au disable, retirer uniquement `heavencube:menu_redirect` des sessions encore courantes.
+Au disable isolé du plugin, retirer uniquement `heavencube:menu_redirect` des joueurs connectés
+dont la session PacketEvents est encore courante. Lors d'un arrêt global, détecté par
+[Server#isStopping()](https://jd.papermc.io/paper/26.3/org/bukkit/Server.html#isStopping()),
+ne pas envoyer de paquet : les handlers Netty peuvent déjà être retirés avant le disable de PacketEvents.
+Les tâches de fallback et les références de sessions sont nettoyées dans les deux cas.
+`AdvancementInjectorTest` couvre ces scénarios avec un transport simulé, ainsi que les sessions remplacées,
+les joueurs déconnectés et la libération des références malgré un échec d'envoi.
 En jeu : écran via menu Échap et touche L, tab présent, clic normal, spam, reconnect, reload valide/vide/invalide, disable et absence d’interférence avec les autres progrès.
 
 La compilation ne valide ni le protocole client, ni les conflits d’un autre plugin de progrès, ni le modèle Nexo.

@@ -33,6 +33,8 @@ consulter [son guide](https://github.com/HeavenCube/HCPlugins-Core/blob/main/doc
 - Préserver tab uniquement client et identifiant `heavencube:menu_redirect` ; ne pas ajouter un vrai progrès serveur.
 - Ne jamais exécuter la commande console sur le thread réseau ; revalider joueur/plugin avant exécution.
 - Conserver coalescence du spam, traitement de reconnexion et nettoyage des tâches/listeners/pending commands.
+- À l'arrêt global (`Server#isStopping()`), annuler les tâches et libérer les sessions sans envoyer de paquet.
+  Hors arrêt global, retirer le tab uniquement du joueur connecté et de la session PacketEvents courante.
 - Ne pas renommer console-command ni {player} sans migration explicitement demandée.
 - Ne pas remplacer PacketEvents par NMS/réflexion ni fermer des écrans sans filtrer exactement le tab concerné.
 
