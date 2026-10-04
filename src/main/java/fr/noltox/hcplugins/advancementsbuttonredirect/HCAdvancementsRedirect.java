@@ -120,8 +120,7 @@ public final class HCAdvancementsRedirect extends JavaPlugin {
     private String loadConfiguredCommand() {
         Path configPath = HCPluginFiles.singleConfiguration(this);
         FileConfiguration candidate = BukkitYaml.load(configPath);
-        String command = candidate.getString(CONSOLE_COMMAND_KEY);
-        return command == null ? "" : command.strip();
+        return ConfiguredCommandExecutor.validateCommand(candidate.get(CONSOLE_COMMAND_KEY));
     }
 
     @Override

@@ -30,9 +30,10 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
 /*
- * PacketEvents 2.13.0 exposes mixed nullness metadata on its fluent item and
+ * PacketEvents 2.14.0 exposes mixed nullness metadata on its fluent item and
  * advancement APIs. Eclipse therefore reports unchecked null conversions for
  * constants and values which PacketEvents guarantees to be present.
  */
@@ -46,7 +47,7 @@ final class AdvancementInjector implements PacketListener, Listener {
 
     private final JavaPlugin plugin;
     private final PlayerManager playerManager;
-    private final Set<UUID> injectedPlayers = ConcurrentHashMap.newKeySet();
+    private final Map<UUID, User> injectedPlayers = new ConcurrentHashMap<>();
     // Bukkit lifecycle callbacks and fallback tasks access this map only from the server thread.
     private final Map<UUID, BukkitTask> pendingFallbacks = new HashMap<>();
     private volatile boolean active = true;
@@ -100,6 +101,20 @@ final class AdvancementInjector implements PacketListener, Listener {
         active = false;
         pendingFallbacks.values().forEach(BukkitTask::cancel);
         pendingFallbacks.clear();
+        for (UUID playerId : Set.copyOf(injectedPlayers.keySet())) {
+            Player player = Bukkit.getPlayer(playerId);
+            User user = player == null ? null : playerManager.getUser(player);
+            if (user == null || injectedPlayers.get(playerId) != user) {
+                continue;
+            }
+            try {
+                user.sendPacketSilently(new WrapperPlayServerUpdateAdvancements(
+                        false, List.of(), Set.of(MENU_REDIRECT_ID), Map.of(), false));
+            } catch (RuntimeException exception) {
+                plugin.getLogger().log(Level.WARNING,
+                        "Impossible de retirer le tab de redirection pour " + playerId + '.', exception);
+            }
+        }
         injectedPlayers.clear();
     }
 
@@ -141,14 +156,15 @@ final class AdvancementInjector implements PacketListener, Listener {
         if (!active || event.isCancelled()) {
             return;
         }
-        injectedPlayers.add(playerId);
+        User user = event.getUser();
+        injectedPlayers.put(playerId, user);
         if (!active) {
-            injectedPlayers.remove(playerId);
+            injectedPlayers.remove(playerId, user);
         }
     }
 
     private void sendFallback(UUID playerId) {
-        if (!active || !plugin.isEnabled() || injectedPlayers.contains(playerId)) {
+        if (!active || !plugin.isEnabled()) {
             return;
         }
 
@@ -163,6 +179,9 @@ final class AdvancementInjector implements PacketListener, Listener {
                     + ". Impossible d'injecter le progrès de redirection.");
             return;
         }
+        if (injectedPlayers.get(playerId) == user) {
+            return;
+        }
 
         WrapperPlayServerUpdateAdvancements packet = new WrapperPlayServerUpdateAdvancements(
                 false,
@@ -173,7 +192,7 @@ final class AdvancementInjector implements PacketListener, Listener {
         );
         user.sendPacketSilently(packet);
         if (active && plugin.isEnabled() && player.isOnline() && playerManager.getUser(player) == user) {
-            injectedPlayers.add(playerId);
+            injectedPlayers.put(playerId, user);
         }
     }
 

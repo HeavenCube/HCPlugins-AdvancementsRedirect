@@ -2,6 +2,9 @@
 
 ## Point d’entrée
 
+Cible : Paper 26.3 (`26.3.build.+`), Java 25 sans preview. Compilation avec `-Xlint:all` ;
+examiner les warnings avant de les attribuer au plugin ou à une dépendance.
+
 Ce dépôt appartient à la suite privée d’usage HeavenCube, publiée comme source consultable.
 Il dépend obligatoirement de HCCore. Lire d’abord [AGENTS.md](../AGENTS.md), puis le Core voisin.
 Le [guide commun](https://github.com/HeavenCube/HCPlugins-Core/blob/main/docs/ECOSYSTEM.md) décrit les règles Java/Paper, les contrats Core,
@@ -74,7 +77,10 @@ thread réel, puis revalider le contexte avant mutation.
 
 ## Validation et limites
 
-Pas de suite Java actuellement. En jeu : écran via menu Échap et touche L, tab présent, clic normal, spam, reconnect, reload valide/vide/invalide, disable et absence d’interférence avec les autres progrès.
+`ConfiguredCommandExecutorTest` couvre commande absente/vide, arguments et rejet des types YAML non textuels.
+L'injection mémorise la session PacketEvents ; un ancien envoi ne dispense pas la nouvelle session du fallback.
+Au disable, retirer uniquement `heavencube:menu_redirect` des sessions encore courantes.
+En jeu : écran via menu Échap et touche L, tab présent, clic normal, spam, reconnect, reload valide/vide/invalide, disable et absence d’interférence avec les autres progrès.
 
 La compilation ne valide ni le protocole client, ni les conflits d’un autre plugin de progrès, ni le modèle Nexo.
 

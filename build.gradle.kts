@@ -7,13 +7,17 @@ java { toolchain.languageVersion = JavaLanguageVersion.of(25) }
 
 dependencies {
     compileOnly("fr.noltox.hcplugins:core-api")
-    compileOnly("io.papermc.paper:paper-api:26.2.build.+")
+    compileOnly("io.papermc.paper:paper-api:26.3.build.+")
     compileOnly("com.github.retrooper:packetevents-spigot:2.14.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
+    testImplementation("io.papermc.paper:paper-api:26.3.build.+")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.3")
 }
 
 tasks.withType<JavaCompile>().configureEach {
     options.release = 25
     options.encoding = "UTF-8"
+    options.compilerArgs.add("-Xlint:all")
 }
 
 tasks.processResources {
@@ -25,3 +29,5 @@ tasks.processResources {
 tasks.jar {
     archiveFileName.set("HCAdvancementsRedirect-${project.version}.jar")
 }
+
+tasks.test { useJUnitPlatform() }

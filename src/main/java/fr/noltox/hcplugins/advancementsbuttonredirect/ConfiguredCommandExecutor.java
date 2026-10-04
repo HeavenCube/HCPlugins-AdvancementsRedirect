@@ -23,7 +23,17 @@ final class ConfiguredCommandExecutor {
     }
 
     void setConfiguredCommand(@Nullable String configuredCommand) {
-        this.configuredCommand = configuredCommand == null ? "" : configuredCommand;
+        this.configuredCommand = validateCommand(configuredCommand);
+    }
+
+    static String validateCommand(@Nullable Object value) {
+        if (value == null) {
+            return "";
+        }
+        if (!(value instanceof String command)) {
+            throw new IllegalStateException("La clé 'console-command' doit être un texte.");
+        }
+        return command.strip();
     }
 
     void run(Player player) {
