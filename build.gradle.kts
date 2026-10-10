@@ -13,7 +13,7 @@ dependencies {
     testImplementation("io.papermc.paper:paper-api:26.3.build.+")
     testImplementation("com.github.retrooper:packetevents-spigot:2.14.0")
     // PacketEvents' test fixtures need the buffers normally provided by the server.
-    testRuntimeOnly("io.netty:netty-buffer:4.2.16.Final")
+    testRuntimeOnly("io.netty:netty-buffer:4.2.19.Final")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.3")
 }
 
